@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ohms — Portfolio & CV</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --bg-alt: #121826;
+    --card: #161d2e;
+    --text: #e6e9f0;
+    --muted: #9aa4b8;
+    --accent: #6ee7ff;
+    --accent2: #a78bfa;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* Background glow */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -20%; left: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(110,231,255,0.15), transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: -20%; right: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, rgba(167,139,250,0.15), transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 6%;
+    background: rgba(11,15,25,0.75);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  nav .logo { font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; }
+  nav ul { list-style: none; display: flex; gap: 28px; }
+  nav ul li a { color: var(--muted); font-size: 0.95rem; transition: color 0.2s; }
+  nav ul li a:hover { color: var(--accent); }
+
+  section { position: relative; z-index: 1; padding: 120px 6% 80px; max-width: 1100px; margin: 0 auto; }
+
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 0; }
+  .hero .eyebrow { color: var(--accent); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 16px; }
+  .hero h1 { font-size: clamp(2.5rem, 6vw, 4.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+  .hero h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { color: var(--muted); font-size: 1.15rem; max-width: 560px; margin-bottom: 36px; }
+  .btn-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #0b0f19; }
+  .btn-outline { border: 1px solid var(--border); color: var(--text); }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(110,231,255,0.15); }
+
+  h2.section-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+  p.section-sub { color: var(--muted); margin-bottom: 48px; max-width: 600px; }
+
+  .about-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: start; }
+  @media (max-width: 800px) { .about-grid { grid-template-columns: 1fr; } .about-grid > div:nth-child(2) { order: -1; } }
+  .avatar-box {
+    width: 100%; aspect-ratio: 1; border-radius: 24px;
+    background: linear-gradient(135deg, var(--card), var(--bg-alt));
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; font-weight: 800; color: var(--accent);
+  }
+  .about-text p { color: var(--muted); margin-bottom: 16px; }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .skill-tags span {
+    padding: 8px 16px; border-radius: 999px; background: var(--card);
+    border: 1px solid var(--border); font-size: 0.85rem; color: var(--text);
+  }
+
+  .timeline { border-left: 2px solid var(--border); margin-left: 10px; }
+  .timeline-item { position: relative; padding: 0 0 40px 32px; }
+  .timeline-item::before {
+    content: ""; position: absolute; left: -7px; top: 4px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 4px rgba(110,231,255,0.15);
+  }
+  .timeline-item .role { font-weight: 700; font-size: 1.1rem; }
+  .timeline-item .meta { color: var(--accent2); font-size: 0.85rem; margin-bottom: 8px; }
+  .timeline-item p { color: var(--muted); }
+
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .project-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 28px; transition: transform 0.25s, border-color 0.25s;
+  }
+  .project-card:hover { transform: translateY(-6px); border-color: rgba(110,231,255,0.4); }
+  .project-card .tag { color: var(--accent); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .project-card h3 { margin: 10px 0 10px; font-size: 1.2rem; }
+  .project-card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 16px; }
+  .project-card a { font-size: 0.9rem; font-weight: 600; }
+
+  .contact-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+    padding: 48px; text-align: center;
+  }
+  .contact-box h2 { font-size: 1.8rem; margin-bottom: 12px; }
+  .contact-box p { color: var(--muted); margin-bottom: 28px; }
+
+  footer { text-align: center; padding: 40px 6%; color: var(--muted); font-size: 0.85rem; position: relative; z-index: 1; }
+
+  ::selection { background: var(--accent); color: #0b0f19; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">OHMS<span style="color:var(--accent)">.</span></div>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="top">
+  <div class="eyebrow">Portfolio &amp; CV</div>
+  <h1>Hi, I'm Ohms —<br><span>building things that work.</span></h1>
+  <p class="sub">Replace this with a one-line pitch: what you do, who you help, and what makes your work distinct.</p>
+  <div class="btn-row">
+    <a href="#projects" class="btn btn-primary">View Projects</a>
+    <a href="cv.pdf" class="btn btn-outline">Download CV ↓</a>
+  </div>
+</section>
+
+<section id="about">
+  <h2 class="section-title">About</h2>
+  <p class="section-sub">A short summary of your background and what you're looking for.</p>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>Write 2–3 short paragraphs here: your background, what you focus on, and what kind of work or role you're pursuing. Keep it specific — mention real tools, industries, or outcomes rather than generic adjectives.</p>
+      <p>Second paragraph can cover education, certifications, or a personal note that makes you memorable to a hiring manager or client.</p>
+      <div class="skill-tags">
+        <span>Skill 1</span><span>Skill 2</span><span>Skill 3</span><span>Skill 4</span><span>Skill 5</span>
+      </div>
+    </div>
+    <div class="avatar-box">OH</div>
+  </div>
+</section>
+
+<section id="experience">
+  <h2 class="section-title">Experience</h2>
+  <p class="section-sub">Your work history, most recent first.</p>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="role">Job Title — Company Name</div>
+      <div class="meta">Month Year – Present</div>
+      <p>One or two lines on what you did and the impact it had. Use a concrete number if you have one.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="role">Previous Job Title — Company Name</div>
+      <div class="meta">Month Year – Month Year</div>
+      <p>Same format: role, contribution, result.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="role">Education — School Name</div>
+      <div class="meta">Year – Year</div>
+      <p>Degree, honors, or relevant coursework.</p>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <h2 class="section-title">Projects</h2>
+  <p class="section-sub">A few things you've built or shipped.</p>
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="tag">Project</div>
+      <h3>Project One</h3>
+      <p>One-sentence description of what it does and what you used to build it.</p>
+      <a href="#">View →</a>
+    </div>
+    <div class="project-card">
+      <div class="tag">Project</div>
+      <h3>Project Two</h3>
+      <p>One-sentence description of what it does and what you used to build it.</p>
+      <a href="#">View →</a>
+    </div>
+    <div class="project-card">
+      <div class="tag">Project</div>
+      <h3>Project Three</h3>
+      <p>One-sentence description of what it does and what you used to build it.</p>
+      <a href="#">View →</a>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-box">
+    <h2>Let's talk</h2>
+    <p>Open to opportunities and collaborations — reach out any time.</p>
+    <div class="btn-row" style="justify-content:center">
+      <a href="mailto:kamandomar98@gmail.com" class="btn btn-primary">Email Me</a>
+      <a href="https://www.linkedin.com/" class="btn btn-outline">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © <span id="year"></span> Ohms. Built with plain HTML/CSS — no framework required.
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
