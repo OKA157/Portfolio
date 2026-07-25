@@ -131,6 +131,62 @@
   footer { text-align: center; padding: 40px 6%; color: var(--muted); font-size: 0.85rem; position: relative; z-index: 1; }
 
   ::selection { background: var(--accent); color: #0b0f19; }
+
+  /* Cookie consent */
+  #cookie-banner {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
+    background: var(--bg-alt); border-top: 1px solid var(--border);
+    padding: 20px 6%; display: flex; flex-wrap: wrap; gap: 16px;
+    align-items: center; justify-content: space-between;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.35);
+  }
+  #cookie-banner.hidden { display: none; }
+  #cookie-banner p { color: var(--muted); font-size: 0.9rem; max-width: 640px; margin: 0; }
+  #cookie-banner p a { color: var(--accent); }
+  .cookie-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cookie-btn {
+    padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.85rem;
+    border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s;
+  }
+  .cookie-btn:hover { transform: translateY(-1px); }
+  .cookie-btn.accept { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #0b0f19; border: none; }
+  .cookie-btn.reject { background: transparent; color: var(--text); }
+  .cookie-btn.settings { background: transparent; color: var(--muted); }
+
+  #cookie-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1001;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  #cookie-modal-overlay.hidden { display: none; }
+  #cookie-modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    max-width: 480px; width: 100%; padding: 32px;
+  }
+  #cookie-modal h3 { font-size: 1.3rem; margin-bottom: 8px; }
+  #cookie-modal p.desc { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+  .cookie-option {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    padding: 14px 0; border-top: 1px solid var(--border);
+  }
+  .cookie-option:first-of-type { border-top: none; }
+  .cookie-option .label { font-weight: 600; font-size: 0.95rem; }
+  .cookie-option .note { color: var(--muted); font-size: 0.8rem; margin-top: 4px; max-width: 320px; }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .slider {
+    position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: 0.2s;
+  }
+  .switch .slider::before {
+    content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
+    background: var(--text); border-radius: 50%; transition: 0.2s;
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(20px); background: #0b0f19; }
+  .switch input:disabled + .slider { opacity: 0.5; cursor: not-allowed; }
+  #cookie-modal .modal-actions { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+
+  .footer-link { color: var(--muted); text-decoration: underline; cursor: pointer; background: none; border: none; font-size: 0.85rem; font-family: inherit; }
+  .footer-link:hover { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -230,10 +286,150 @@
 
 <footer>
   © <span id="year"></span> Ohms. Built with plain HTML/CSS — no framework required.
+  &nbsp;·&nbsp;
+  <button class="footer-link" id="open-cookie-settings">Cookie settings</button>
+  &nbsp;·&nbsp;
+  <a href="#" id="privacy-link" class="footer-link" style="text-decoration:underline;">Privacy Policy</a>
 </footer>
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" class="hidden">
+  <p>
+    This site uses cookies to understand site usage (analytics). Essential cookies are always on;
+    analytics cookies are optional and only load if you accept. See our
+    <a href="#" id="privacy-link-2">Privacy Policy</a> for details.
+  </p>
+  <div class="cookie-actions">
+    <button class="cookie-btn settings" id="cb-settings">Manage preferences</button>
+    <button class="cookie-btn reject" id="cb-reject">Reject non-essential</button>
+    <button class="cookie-btn accept" id="cb-accept">Accept all</button>
+  </div>
+</div>
+
+<!-- Cookie preferences modal -->
+<div id="cookie-modal-overlay" class="hidden">
+  <div id="cookie-modal">
+    <h3>Cookie preferences</h3>
+    <p class="desc">Choose which cookies this site can use. You can change this anytime from the "Cookie settings" link in the footer.</p>
+
+    <div class="cookie-option">
+      <div>
+        <div class="label">Essential</div>
+        <div class="note">Required for the site to function (e.g. remembering this choice). Cannot be turned off.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" checked disabled>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="cookie-option">
+      <div>
+        <div class="label">Analytics</div>
+        <div class="note">Helps understand visits (e.g. Google Analytics). No analytics cookies are set unless you enable this.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="cm-analytics">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cookie-btn reject" id="cm-reject">Reject non-essential</button>
+      <button class="cookie-btn accept" id="cm-save">Save preferences</button>
+    </div>
+  </div>
+</div>
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---------- Cookie consent management ---------- */
+  const CONSENT_KEY = 'cookie-consent-v1';
+
+  function getConsent() {
+    try { return JSON.parse(localStorage.getItem(CONSENT_KEY)); } catch (e) { return null; }
+  }
+  function setConsent(analytics) {
+    const consent = { essential: true, analytics: !!analytics, timestamp: Date.now() };
+    localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+    applyConsent(consent);
+  }
+  function applyConsent(consent) {
+    if (consent.analytics) {
+      loadAnalytics();
+    }
+  }
+
+  // Analytics only loads if the visitor opted in. Replace G-XXXXXXX with your
+  // real Google Analytics Measurement ID when you have one.
+  function loadAnalytics() {
+    if (window.__analyticsLoaded) return;
+    window.__analyticsLoaded = true;
+    const GA_ID = 'G-XXXXXXX'; // <-- put your GA4 Measurement ID here
+    if (GA_ID.includes('XXXX')) {
+      console.log('Analytics consent granted, but no GA Measurement ID configured yet.');
+      return;
+    }
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+  }
+
+  const banner = document.getElementById('cookie-banner');
+  const modalOverlay = document.getElementById('cookie-modal-overlay');
+  const analyticsToggle = document.getElementById('cm-analytics');
+
+  function showBanner() { banner.classList.remove('hidden'); }
+  function hideBanner() { banner.classList.add('hidden'); }
+  function showModal() {
+    const existing = getConsent();
+    analyticsToggle.checked = existing ? existing.analytics : false;
+    modalOverlay.classList.remove('hidden');
+  }
+  function hideModal() { modalOverlay.classList.add('hidden'); }
+
+  const existingConsent = getConsent();
+  if (existingConsent) {
+    applyConsent(existingConsent);
+  } else {
+    showBanner();
+  }
+
+  document.getElementById('cb-accept').addEventListener('click', () => {
+    setConsent(true); hideBanner();
+  });
+  document.getElementById('cb-reject').addEventListener('click', () => {
+    setConsent(false); hideBanner();
+  });
+  document.getElementById('cb-settings').addEventListener('click', () => {
+    showModal();
+  });
+  document.getElementById('cm-save').addEventListener('click', () => {
+    setConsent(analyticsToggle.checked); hideModal(); hideBanner();
+  });
+  document.getElementById('cm-reject').addEventListener('click', () => {
+    setConsent(false); hideModal(); hideBanner();
+  });
+  document.getElementById('open-cookie-settings').addEventListener('click', (e) => {
+    e.preventDefault(); showModal();
+  });
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) hideModal();
+  });
+
+  ['privacy-link', 'privacy-link-2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Add your privacy policy page/content here — e.g. link this to a privacy.html page.');
+    });
+  });
 </script>
 </body>
 </html>
